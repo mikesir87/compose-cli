@@ -193,7 +193,18 @@ func (s *composeService) down(ctx context.Context, projectName string, options a
 
 // List executes the equivalent to a `docker stack ls`
 func (s *composeService) List(ctx context.Context, opts api.ListOptions) ([]api.Stack, error) {
-	return s.sdk.ListReleases()
+	manualDeployments, err := s.client.GetReleases(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	helmStacks, err := s.sdk.ListReleases()
+	if err != nil {
+		return nil, err
+	}
+
+	return append(manualDeployments, helmStacks...), nil
 }
 
 // Build executes the equivalent to a `compose build`
